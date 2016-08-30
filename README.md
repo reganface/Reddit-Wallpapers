@@ -27,6 +27,6 @@ $ ./node_modules/electron/dist/electron .
 
 ### TODO
 
-> Add some sort of schedule options with background service
-> Add some styles so it's not just basic html
-> Package it up for end users
+  - Add some sort of schedule options with background service
+  - Add some styles so it's not just basic html
+  - Package it up for end users
