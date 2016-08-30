@@ -1,6 +1,9 @@
 # Reddit-Wallpapers
 Quick node script to download top images from the past week in selected subreddits.  Images that already exist locally are skipped over.
 
+### Electron
+I started this branch to experiment giving this script a GUI and running without external requirements.  Not sure how much I'll be able to put into this, though.
+
 ### Installation
 
 [Node.js](https://nodejs.org/) is required to run this script.
