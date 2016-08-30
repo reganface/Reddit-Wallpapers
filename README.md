@@ -33,3 +33,19 @@ Add the folling line to run every Monday at 8pm
 ```
 0 20 * * 1 /usr/local/bin/node /path/to/script/Reddit-Wallpapers/wallpaper.js
 ```
+
+### Customizing Subreddits
+
+Any number of subreddits can be scanned.  Just modify the subreddits array near the top of wallpaper.js
+```
+// subreddits to check
+var subreddits = [
+	"/r/wallpaper",
+	"/r/wallpapers",
+	"/r/EarthPorn",
+	"/r/EyeCandy",	// this one doesn't have much from imgur it seems
+	"/r/topwalls",
+	"/r/MinimalWallpaper",
+	"/r/GameWalls"
+];
+```
