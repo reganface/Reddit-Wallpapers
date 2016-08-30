@@ -3,9 +3,20 @@
   "version": "1.0.0",
   "description": "A simple node script for downloading top images from various subreddits",
   "main": "wallpaper.js",
-  "keywords": [],
+  "keywords": [
+	  "wallpaper",
+	  "reddit"
+  ],
   "author": "Chris Regan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reganface/Reddit-Wallpapers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/reganface/Reddit-Wallpapers/issues"
+  },
   "dependencies": {
     "cheerio": "^0.22.0"
-  }
+  },
+  "license": "MIT"
 }
