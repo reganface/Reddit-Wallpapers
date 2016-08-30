@@ -1,0 +1,11 @@
+{
+  "name": "Reddit-Wallpapers",
+  "version": "1.0.0",
+  "description": "A simple node script for downloading top images from various subreddits",
+  "main": "wallpaper.js",
+  "keywords": [],
+  "author": "Chris Regan",
+  "dependencies": {
+    "cheerio": "^0.22.0"
+  }
+}
