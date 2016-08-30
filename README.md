@@ -1,5 +1,5 @@
 # Reddit-Wallpapers
-Quick node script to download top images from the past week in selected subreddits.  Images that already exist locally are skipped over.
+Quick node script to download top images from the past week in selected subreddits.  Edit the download directory in wallpaper.js and then set your OS wallpaper settings to shuffle images from that same directory.  Images that already exist locally are skipped over.
 
 ### Installation
 
