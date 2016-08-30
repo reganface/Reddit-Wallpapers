@@ -14,40 +14,14 @@
 
 /******************************
  *
- *	Config
- *
- ******************************/
-
-// subreddits to check
-var subreddits = [
-	"/r/wallpaper",
-	"/r/wallpapers",
-	"/r/EarthPorn",
-	"/r/EyeCandy",	// this one doesn't have much from imgur it seems
-	"/r/topwalls",
-	"/r/MinimalWallpaper",
-	"/r/GameWalls"
-];
-
-// how to filter the subreddit - default is top posts from the past week
-var subredditFilter = "/top/?sort=top&t=week";
-
-// path to store files
-
-// Windows - backslashes need to be escaped (double backslashes)
-//var path = "C:\\wallpapers\\";
-
-// Linux/Mac
-var path = "/home/chris/wallpapers/";
-
-
-
-/******************************
- *
  *	Dependencies
  *
  ******************************/
 
+const Configstore = require('configstore');
+const pkg = require('./package.json');
+const conf = new Configstore(pkg.name);
+const {dialog} = require('electron').remote;	// for future use of better looking file dialogs
 var https = require('https');
 var fs = require('fs');
 var cheerio = require('cheerio');
@@ -56,6 +30,34 @@ var options = {
     port: 443
 };
 
+
+/******************************
+ *
+ *	Config
+ *
+ ******************************/
+
+var defaults = {
+	subreddits: [
+		"wallpaper",
+		"wallpapers",
+		"EarthPorn",
+		"EyeCandy",
+		"topwalls",
+		"MinimalWallpaper",
+		"GameWalls"
+	],
+	subredditFilter: "/top/?sort=top&t=week"
+};
+
+if (!conf.get('subreddits')) {
+	// config does not exist, set defaults
+	conf.all = defaults;
+}
+
+if (conf.get('path')) {
+	$("#path-display").val(conf.get('path'));
+}
 
 
 /******************************
@@ -166,17 +168,38 @@ var download = function(url, dest, cb) {
 
 /******************************
  *
+ *	Events
+ *
+ ******************************/
+
+
+$("#path").on("click", function() {
+	dialog.showOpenDialog({title: "Select Save Folder", properties: ["openDirectory"]}, function(folder) {
+		if (folder) {
+			$("#path-display").val(folder);
+			conf.set('path', folder);
+		}
+	});
+});
+
+
+
+
+/******************************
+ *
  *	Loop through all subreddits
  *
  ******************************/
 
 // first make sure the local directory exists
-if (!fs.existsSync(path)){
-	console.log("Path does not exist.  Creating directory...");
-    fs.mkdirSync(path);
-}
+//if (!fs.existsSync(path)){
+//	console.log("Path does not exist.  Creating directory...");
+//    fs.mkdirSync(path);
+//}
 
+/* prevent from running for now
 subreddits.forEach(function(value){
 	options.path = value + subredditFilter;
 	getLinks(options);
 });
+*/
