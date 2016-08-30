@@ -34,7 +34,7 @@ var status = {
 	newImages: 0,
 	skipped: 0,
 	total: 0,
-	status: "Running"
+	status: "Not Started"
 };
 
 
@@ -104,10 +104,13 @@ function updateTotalImages() {
 
 function updateRunStatus() {
 	var output;
-	if (status.newImages + status.skipped >= status.total && status.total > 0) {
-		// done update status text
+
+	// check if we are finished
+	if (status.subredditsChecked >= status.totalSubreddits && status.newImages + status.skipped >= status.total) {
 		status.status = "Finished!";
 	}
+
+	// update html
 	output = "Images Found: " + status.total + " | Downloaded: " + status.newImages + " | Skipped: " + status.skipped;
 	$("#run-status").text(status.status+" - "+output);
 }
@@ -283,12 +286,19 @@ $("#subreddit-list").on("click", ".remove-subreddit", function(e) {
 
 // run
 $("#get-images").on("click", function() {
+	// ignore if we are already Running
+	if (status.status == "Running") {
+		return;
+	}
 
+	// make sure we have subreddits and a save directory
 	if (path && subreddits.length) {
 		// update status
 		status.newImages = 0;
 		status.skipped = 0;
 		status.total = 0;
+		status.totalSubreddits = subreddits.length;
+		status.subredditsChecked = 0;
 		status.status = "Running";
 		updateRunStatus();
 
@@ -304,6 +314,9 @@ $("#get-images").on("click", function() {
 			options.path = completePath;
 
 			getLinks(options, function(links) {
+				// add to how many subreddits have been checked
+				status.subredditsChecked++;
+
 				// loop through all links to check each one
 				links.forEach(function(link) {
 					fs.stat(path+link.fileName, function(err, stat) {
