@@ -20,17 +20,25 @@
 
 // subreddits to check
 var subreddits = [
-	"/r/wallpaper/top/?sort=top&t=week",
-	"/r/wallpapers/top/?sort=top&t=week",
-	"/r/EarthPorn/top/?sort=top&t=week",
-	"/r/EyeCandy/top/?sort=top&t=week",	// this one doesn't have much from imgur it seems
-	"/r/topwalls/top/?sort=top&t=week",
-	"/r/MinimalWallpaper/top/?sort=top&t=week",
-	"/r/GameWalls/top/?sort=top&t=week"
+	"/r/wallpaper",
+	"/r/wallpapers",
+	"/r/EarthPorn",
+	"/r/EyeCandy",	// this one doesn't have much from imgur it seems
+	"/r/topwalls",
+	"/r/MinimalWallpaper",
+	"/r/GameWalls"
 ];
 
+// how to filter the subreddit - default is top posts from the past week
+var subredditFilter = "/top/?sort=top&t=week";
+
 // path to store files
-var path = "D:\\wallpapers\\";
+
+// Windows - backslashes need to be escaped (double backslashes)
+//var path = "C:\\wallpapers\\";
+
+// Linux/Mac
+var path = "/home/chris/wallpapers/";
 
 
 
@@ -56,17 +64,19 @@ var options = {
  *
  ******************************/
 
-// get HTML of selected page
+// get HTML of path - the selected subreddit
 var getLinks = function(options) {
 	var req = https.get(options, function(response) {
+
 		// handle the response
 		var res_data = '';
 		response.on('data', function(chunk) {
 			res_data += chunk;
 		});
 
-		// finished getting html
+		// once we're finished getting html
 		response.on('end', function() {
+
 			// load html into cheerio object
 	    	$ = cheerio.load(res_data);
 
@@ -85,10 +95,10 @@ var getLinks = function(options) {
 	    			var temp = href.split('?');
 					href = temp[0];
 
-					// only use https for getting the images
+					// use https
 					href = href.replace('http:', 'https:');
 
-					// get the direct file
+					// get the direct file url
 					href = href.replace('https://imgur.com', 'https://i.imgur.com');
 					href = href.replace('https://www.imgur.com', 'https://i.imgur.com');
 					href = href.replace('https://m.imgur.com', 'https://i.imgur.com');
@@ -103,7 +113,7 @@ var getLinks = function(options) {
 						href += ".jpg";
 					}
 
-	    			// check if file already exists
+	    			// check if file already exists locally
 	    			fs.stat(path+fileName, function(err, stat) {
 	    				if (err) {
 		    				if(err.code == 'ENOENT') {
@@ -133,7 +143,7 @@ var getLinks = function(options) {
 	req.on('error', function(e) {
 		console.log("Got error: " + e.message);
 	});
-}
+};
 
 // download and save file
 var download = function(url, dest, cb) {
@@ -156,11 +166,17 @@ var download = function(url, dest, cb) {
 
 /******************************
  *
- *	Main subreddit loop
+ *	Loop through all subreddits
  *
  ******************************/
 
+// first make sure the local directory exists
+if (!fs.existsSync(path)){
+	console.log("Path does not exist.  Creating directory...");
+    fs.mkdirSync(path);
+}
+
 subreddits.forEach(function(value){
-	options.path = value;
+	options.path = value + subredditFilter;
 	getLinks(options);
 });
