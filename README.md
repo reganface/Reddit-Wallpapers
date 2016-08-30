@@ -2,7 +2,7 @@
 Quick node script to download top images from the past week in selected subreddits.  Images that already exist locally are skipped over.
 
 ### Electron
-I started this branch to experiment giving this script a GUI and running without external requirements.  Not sure how much I'll be able to put into this, though.
+I started this branch to experiment giving this script a GUI and running without external requirements.  Not sure how much I'll be able to put into this, though.  So far I've made a basic frame which allows setting the save directory as well as adding and removing subreddits.
 
 ### Installation
 
@@ -11,44 +11,22 @@ I started this branch to experiment giving this script a GUI and running without
 ```sh
 $ git clone https://github.com/reganface/Reddit-Wallpapers.git
 $ cd Reddit-Wallpapers
+$ git checkout electron
 $ npm install
-$ node wallpaper.js
 ```
 
-Run this manually every so often for new images, or schedule it to run once a week.
-
-### Scheduling
-On Windows, use Task Scheduler to create a weekly task.  You'll need to create a .bat file in your Reddit-Wallpapers directory with the following line in it.
-
-```sh
-node wallpaper.js
-```
-
-Have Task Scheduler run this .bat file once a week.
-
-On Linux and Mac you can use your crontab to run this script
+If you have electron installed globally you can then run:
 
 ```
-$ crontab -e
+$ electron .
 ```
-Add the folling line to run every Monday at 8pm
+Otherwise you'll need to specify the path
+```
+$ ./node_modules/electron/dist/electron .
+```
 
-```
-0 20 * * 1 /usr/local/bin/node /path/to/script/Reddit-Wallpapers/wallpaper.js
-```
+### TODO
 
-### Customizing Subreddits
-
-Any number of subreddits can be scanned.  Just modify the subreddits array near the top of wallpaper.js
-```
-// subreddits to check
-var subreddits = [
-	"/r/wallpaper",
-	"/r/wallpapers",
-	"/r/EarthPorn",
-	"/r/EyeCandy",	// this one doesn't have much from imgur it seems
-	"/r/topwalls",
-	"/r/MinimalWallpaper",
-	"/r/GameWalls"
-];
-```
+> Add some sort of schedule options with background service
+> Add some styles so it's not just basic html
+> Package it up for end users
