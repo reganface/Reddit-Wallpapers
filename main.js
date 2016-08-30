@@ -6,7 +6,7 @@ let win;
 
 function createWindow () {
 	// Create the browser window.
-	win = new BrowserWindow({show: false, width: 900, height: 600});
+	win = new BrowserWindow({show: false, width: 525, height: 600});
 
 	// no menu bar
 	//win.setMenu(null);

@@ -21,13 +21,20 @@
 const Configstore = require('configstore');
 const pkg = require('./package.json');
 const conf = new Configstore(pkg.name);
-const {dialog} = require('electron').remote;	// for future use of better looking file dialogs
+const {dialog} = require('electron').remote;
 var https = require('https');
 var fs = require('fs');
 var cheerio = require('cheerio');
 var options = {
     host: 'www.reddit.com',
     port: 443
+};
+
+var status = {
+	newImages: 0,
+	skipped: 0,
+	total: 0,
+	status: "Running"
 };
 
 
@@ -54,10 +61,15 @@ if (!conf.get('subreddits')) {
 	// config does not exist, set defaults
 	conf.all = defaults;
 }
+var subreddits = conf.get('subreddits');
+var subredditFilter = conf.get('subredditFilter');
+updateSubreddits();
 
-if (conf.get('path')) {
-	$("#path-display").val(conf.get('path'));
-}
+// show selected path
+var path = conf.get('path');
+$("#directory").text(conf.get('path'));
+updateTotalImages();
+
 
 
 /******************************
@@ -66,9 +78,46 @@ if (conf.get('path')) {
  *
  ******************************/
 
+
+function updateSubreddits() {
+	var line;
+
+	// update conf
+	conf.set('subreddits', subreddits);
+
+	// update html
+	$("#subreddit-list").html("");
+	subreddits.forEach(function(value, index) {
+		line = "<li>"+value+" <a href='#' class='remove-subreddit' data-index='"+index+"'><i class='fa fa-remove'></i></a></li>";
+		$("#subreddit-list").append(line);
+	});
+}
+
+
+function updateTotalImages() {
+	fs.readdir(path, function(err, items) {
+		count = items.length;
+		$("#total-images").text(count);
+	});
+}
+
+
+function updateRunStatus() {
+	var output;
+	if (status.newImages + status.skipped >= status.total && status.total > 0) {
+		// done update status text
+		status.status = "Finished!";
+	}
+	output = "Images Found: " + status.total + " | Downloaded: " + status.newImages + " | Skipped: " + status.skipped;
+	$("#run-status").text(status.status+" - "+output);
+}
+
+
 // get HTML of path - the selected subreddit
-var getLinks = function(options) {
+var getLinks = function(options, cb) {
+
 	var req = https.get(options, function(response) {
+		var links = [];
 
 		// handle the response
 		var res_data = '';
@@ -79,11 +128,11 @@ var getLinks = function(options) {
 		// once we're finished getting html
 		response.on('end', function() {
 
-			// load html into cheerio object
-	    	$ = cheerio.load(res_data);
+			html = $(res_data);
 
 	    	// get all front page links
-	    	$("a.title").each(function(index, element){
+	    	html.find("a.title").each(function(index, element){
+
 	    		var href = $(this).attr('href');	// this is the url of each link
 
 	    		// make sure it's an imgur link
@@ -92,6 +141,10 @@ var getLinks = function(options) {
 	    			if (~href.indexOf('/gallery/') || ~href.indexOf('/a/')) {
 	    				return true;
 	    			}
+
+					// add this file to our total
+					status.total++;
+					updateRunStatus();
 
 	    			// get rid of any url parameters
 	    			var temp = href.split('?');
@@ -115,16 +168,27 @@ var getLinks = function(options) {
 						href += ".jpg";
 					}
 
+					//add to links array
+					links.push({
+						href: href,
+						fileName: fileName
+					});
+/*
 	    			// check if file already exists locally
 	    			fs.stat(path+fileName, function(err, stat) {
 	    				if (err) {
 		    				if(err.code == 'ENOENT') {
 		    					// we don't have this one, download it
+								console.log(href, path+fileName);
 								download(href, path+fileName, function(err){
 									if (err) {
 										console.log(href + " - ERROR: " + err);
+										status.skipped++;
+										updateRunStatus();
 									} else {
 										console.log(href + " - Download finished!");
+										status.newImages++;
+										updateRunStatus();
 									}
 								});
 							} else {
@@ -135,10 +199,15 @@ var getLinks = function(options) {
 	    				} else {
 	    					// we have this file already, skip
 	    					console.log(fileName + " - already exists, skipping...");
+							status.skipped++;
+							updateRunStatus();
 	    				}
-	    			});
+	    			});*/
 	    		}
 	    	});
+
+			cb(links);
+
 		});
 	});
 
@@ -173,33 +242,105 @@ var download = function(url, dest, cb) {
  ******************************/
 
 
-$("#path").on("click", function() {
+$("#set-directory").on("click", function() {
 	dialog.showOpenDialog({title: "Select Save Folder", properties: ["openDirectory"]}, function(folder) {
 		if (folder) {
-			$("#path-display").val(folder);
-			conf.set('path', folder);
+			// being returned as an array so take the first index
+			path = folder[0]+"/";
+			conf.set('path', path);
+			$("#directory").text(path);
 		}
 	});
 });
 
+// add new subreddit
+$("#add-subreddit").on("submit", function(e) {
+	e.preventDefault();
+	var newSubreddit = $.trim($("#new-subreddit").val());
 
-
-
-/******************************
- *
- *	Loop through all subreddits
- *
- ******************************/
-
-// first make sure the local directory exists
-//if (!fs.existsSync(path)){
-//	console.log("Path does not exist.  Creating directory...");
-//    fs.mkdirSync(path);
-//}
-
-/* prevent from running for now
-subreddits.forEach(function(value){
-	options.path = value + subredditFilter;
-	getLinks(options);
+	if (newSubreddit !== "") {
+		$("#new-subreddit").val('');
+		subreddits.push(newSubreddit);
+		updateSubreddits();
+	}
 });
-*/
+
+// remove subreddit from list
+$("#subreddit-list").on("click", ".remove-subreddit", function(e) {
+	e.preventDefault();
+	var index = $(this).data('index');
+
+	// remove from array
+	subreddits.splice(index, 1);
+
+	// update config
+	conf.set('subreddits', subreddits);
+
+	// remove from html
+	$(this).parent().remove();
+});
+
+
+// run
+$("#get-images").on("click", function() {
+
+	if (path && subreddits.length) {
+		// update status
+		status.newImages = 0;
+		status.skipped = 0;
+		status.total = 0;
+		status.status = "Running";
+		updateRunStatus();
+
+		// make directory if it doesn't exist
+		if (!fs.existsSync(path)){
+			console.log("Path does not exist.  Creating directory...");
+		    fs.mkdirSync(path);
+		}
+
+		// loop through subreddits and run getLinks function on each
+		subreddits.forEach(function(value){
+			var completePath = "/r/" + value + (subredditFilter ? subredditFilter : "");
+			options.path = completePath;
+
+			getLinks(options, function(links) {
+				// loop through all links to check each one
+				links.forEach(function(link) {
+					fs.stat(path+link.fileName, function(err, stat) {
+						if (err) {
+							if (err.code == 'ENOENT') {
+								// we don't have this file so download it
+								download(link.href, path+link.fileName, function(err) {
+									if (err) {
+										// error downloading
+										console.log(link.href + " - ERROR: " + err);
+										status.skipped++;
+										updateRunStatus();
+									} else {
+										// finished downloading
+										console.log(link.href + " - Download finished!");
+										status.newImages++;
+										updateRunStatus();
+									}
+								});
+
+							} else {
+								// there was an error checking the file locally
+								console.log("ERROR: " + err.code);
+							}
+						} else {
+							// we have this file already, skip
+							console.log(link.fileName + " - already exists, skipping...");
+							status.skipped++;
+							updateRunStatus();
+						}
+					});
+				});
+			});
+		});
+
+	} else {
+		alert("Make sure to set a download directory and add at least one subreddit");
+	}
+
+});

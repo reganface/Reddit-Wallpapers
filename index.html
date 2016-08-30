@@ -2,14 +2,38 @@
 <html>
 <head>
 	<meta charset="UTF-8">
+
+	<link href="./node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link href="./style.css" rel="stylesheet" type="text/css">
+
 	<title>Reddit Wallpapers</title>
 </head>
 <body>
-	<h2>Welcome!</h2>
-	<div>
-		<button type='button' id='path'>Select Save Folder</button>
-		<input type='text' id='path-display' placeholder='Select Folder'>
-	</div>
+	<h3><span id='total-images'></span> Images</h3>
+
+	<hr>
+
+	<button type='button' id='get-images'><i class='fa fa-fw fa-play'></i> Run</button>
+	<span id='run-status'></span>
+	<br>
+
+	<button type='button' id='set-directory'><i class='fa fa-fw fa-folder'></i> Set Save Directory</button>
+	<span id='directory'></span>
+	<br>
+
+	<form id='add-subreddit'>
+		<label>New Subreddit</label>
+		<input type='text' id='new-subreddit' placeholder='New Subreddit'>
+		<button type='submit'><i class='fa fa-fw fa-plus'></i> Add</button>
+	</form>
+
+	<ul id='subreddit-list'>
+
+	</ul>
+
+
+
+
 </body>
 <script>
 	window.$ = window.jQuery = require('jquery');
