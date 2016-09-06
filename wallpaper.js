@@ -64,6 +64,14 @@ var options = {
  *
  ******************************/
 
+// output with timestamp
+function output(msg) {
+    d = new Date();
+	var dateStamp = d.toDateString();
+	var timeStamp = d.toLocaleTimeString();
+	console.log("["+dateStamp+" "+timeStamp+"] - "+msg);
+}
+
 // get HTML of path - the selected subreddit
 var getLinks = function(options) {
 	var req = https.get(options, function(response) {
@@ -120,19 +128,19 @@ var getLinks = function(options) {
 		    					// we don't have this one, download it
 								download(href, path+fileName, function(err){
 									if (err) {
-										console.log(href + " - ERROR: " + err);
+										output(href + " - ERROR: " + err);
 									} else {
-										console.log(href + " - Download finished!");
+										output(href + " - Download finished!");
 									}
 								});
 							} else {
 								// some other error here
-								console.log("ERROR: " + err.code);
+								output("ERROR: " + err.code);
 							}
 
 	    				} else {
 	    					// we have this file already, skip
-	    					console.log(fileName + " - already exists, skipping...");
+	    					output(fileName + " - already exists, skipping...");
 	    				}
 	    			});
 	    		}
@@ -141,7 +149,7 @@ var getLinks = function(options) {
 	});
 
 	req.on('error', function(e) {
-		console.log("Got error: " + e.message);
+		output("Got error: " + e.message);
 	});
 };
 
@@ -172,7 +180,7 @@ var download = function(url, dest, cb) {
 
 // first make sure the local directory exists
 if (!fs.existsSync(path)){
-	console.log("Path does not exist.  Creating directory...");
+	output("Path does not exist.  Creating directory...");
     fs.mkdirSync(path);
 }
 
