@@ -38,7 +38,7 @@ var subredditFilter = "/top/?sort=top&t=week";
 //var path = "C:\\wallpapers\\";
 
 // Linux/Mac
-var path = "/home/chris/wallpapers/";
+var path = "~/wallpapers/";
 
 
 
