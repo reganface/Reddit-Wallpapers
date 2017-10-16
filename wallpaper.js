@@ -175,6 +175,9 @@ var download = function(url, dest, cb) {
 						// delete
 						fs.unlink(dest);
 						cb("Terrible aspect ratio");
+					} else if (d.width < 1900){
+						fs.unlink(dest);
+						cb("Too small");
 					} else {
 						cb();
 					}
