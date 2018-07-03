@@ -22,17 +22,14 @@
 var subreddits = [
 	"/r/wallpaper",
 	"/r/wallpapers",
+    "/r/WQHD_Wallpaper",
 	"/r/EarthPorn",
-	"/r/EyeCandy",	// this one doesn't have much from imgur it seems
 	"/r/topwalls",
 	"/r/MinimalWallpaper",
 	"/r/GameWalls",
 	"/r/ExposurePorn",
 	"/r/SkyPorn",
-	"/r/ImaginaryTechnology",
-	"/r/LightGraffiti",
 	"/r/futureporn",
-	"/r/lightpainting"
 ];
 
 // how to filter the subreddit - default is top posts from the past week
@@ -59,7 +56,7 @@ var sizeOf = require('image-size');
 var fs = require('fs');
 var cheerio = require('cheerio');
 var options = {
-    host: 'www.reddit.com',
+    host: 'old.reddit.com',
     port: 443
 };
 
@@ -206,13 +203,16 @@ if (!fs.existsSync(path)){
     fs.mkdirSync(path);
 }
 
+var x = 0;
 subreddits.forEach(function(value){
-	//options.path = value + subredditFilter;
-	//options.subreddit = value;
-	getLinks({
-		host: 'www.reddit.com',
-	    port: 443,
-		path: value + subredditFilter,
-		subreddit: value
-	});
+    setTimeout(function() {
+        output("Checking " + value);
+    	getLinks({
+		    host: 'old.reddit.com',
+    	    port: 443,
+    		path: value + subredditFilter,
+    		subreddit: value
+    	});
+    }, 2000 * x);
+    x++;
 });
